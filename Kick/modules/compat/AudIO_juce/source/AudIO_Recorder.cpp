@@ -272,7 +272,7 @@ namespace AudIO
 
     void SampleRecorder::process( Buffer<float>& Buf )
     {
-        const int numSamples = (int)juce::jmin<size_t>( blockSize(), scratchL.size() );
+        const int numSamples = (int)juce::jmin( (size_t)blockSize(), scratchL.size() );
         metering.processIn( Buf );
 
         if( !isEnabled() )
@@ -507,7 +507,7 @@ namespace AudIO
 
     void Looper::process( Buffer<float>& Buf )
     {
-        const int numSamples = (int)juce::jmin<size_t>( blockSize(), scratchL.size() );
+        const int numSamples = (int)juce::jmin( (size_t)blockSize(), scratchL.size() );
         metering.processIn( Buf );
 
         if( !isEnabled() )
