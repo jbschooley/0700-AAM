@@ -337,7 +337,12 @@ namespace Controls
                 juce::Logger::outputDebugString( "SIM_BUILD: no SimulatorInterface registered" );
             }
         }
-#else
+
+        // An external panel (real, or a virtual one on a pseudo-terminal) can drive the
+        // simulator too when KICK_PANEL_DEVICE names its serial device.
+        if( juce::SystemStats::getEnvironmentVariable( "KICK_PANEL_DEVICE", {} ).isEmpty() )
+            return;
+#endif
         if( !_FPPort )
         {
             _FPPort.reset( new HwSerialData );
@@ -345,7 +350,6 @@ namespace Controls
         }
         _FPPort->connect();
         // Send Rebooted command to GD
-#endif
     }
 
     void Controls::InputEvents::reconnect()
@@ -385,7 +389,8 @@ namespace Controls
         if( simInterface )
         {
             simInterface->sendMessageToHW( f_HwMsg );
-            return;
+            if( !_FPPort )
+                return;
         }
 #endif
         if( _FPPort ) _FPPort->sendMessageToControlSurface( f_HwMsg );
