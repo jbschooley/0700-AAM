@@ -46,9 +46,8 @@ namespace Controls
 
         ~HwSerialData()
         {
-#ifndef __APPLE__
+            // Stop the transmit thread before the members it uses are destroyed.
             close();
-#endif
         }
 
         void connect()
