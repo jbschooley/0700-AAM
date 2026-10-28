@@ -221,7 +221,7 @@ namespace sim
         // Work on a throwaway copy of a template: the app saves the open project on exit,
         // so loading the first project in the list would modify the user's own projects.
         s.push_back( [log] {
-            auto exeDir  = juce::File::getSpecialLocation( juce::File::currentExecutableFile ).getParentDirectory();
+            auto exeDir  = juce::File::getSpecialLocation( juce::File::currentApplicationFile ).getParentDirectory();
             // The engine opens <folder>/<folder name>.kickPrj.
             auto source  = exeDir.getChildFile( "templates/Template 01/Template 01.kickPrj" );
             auto scratch = juce::File::getSpecialLocation( juce::File::tempDirectory ).getChildFile( "kickem_selftest/SelfTest" );
@@ -423,7 +423,7 @@ namespace sim
 
         wait( 4 );
         s.push_back( [log] {
-            auto exeDir  = juce::File::getSpecialLocation( juce::File::currentExecutableFile ).getParentDirectory();
+            auto exeDir  = juce::File::getSpecialLocation( juce::File::currentApplicationFile ).getParentDirectory();
             auto source  = exeDir.getChildFile( "templates/Template 01/Template 01.kickPrj" );
             auto scratch = juce::File::getSpecialLocation( juce::File::tempDirectory ).getChildFile( "kickem_selftest/SelfTest" );
             scratch.getParentDirectory().deleteRecursively();
@@ -781,7 +781,7 @@ namespace sim
 
         wait( 4 );
         s.push_back( [log] {
-            auto exeDir = juce::File::getSpecialLocation( juce::File::currentExecutableFile ).getParentDirectory();
+            auto exeDir = juce::File::getSpecialLocation( juce::File::currentApplicationFile ).getParentDirectory();
             auto name   = juce::SystemStats::getEnvironmentVariable( "KICKEM_TOUR_PROJECT", "Vintage Soul Kit" );
             auto source = exeDir.getChildFile( "projects" ).getChildFile( name );
             if( !source.isDirectory() )
@@ -882,7 +882,7 @@ namespace sim
 
         wait( 4 );
         s.push_back( [log] {
-            auto exeDir = juce::File::getSpecialLocation( juce::File::currentExecutableFile ).getParentDirectory();
+            auto exeDir = juce::File::getSpecialLocation( juce::File::currentApplicationFile ).getParentDirectory();
             auto source = exeDir.getChildFile( "projects/Vintage Soul Kit" );
             auto root   = juce::File::getSpecialLocation( juce::File::tempDirectory ).getChildFile( "kickem_popup" );
             root.deleteRecursively();
@@ -986,7 +986,7 @@ namespace sim
 
         wait( 4 );
         s.push_back( [log] {
-            auto exeDir = juce::File::getSpecialLocation( juce::File::currentExecutableFile ).getParentDirectory();
+            auto exeDir = juce::File::getSpecialLocation( juce::File::currentApplicationFile ).getParentDirectory();
             auto source = exeDir.getChildFile( "projects/Trap Kit" );
             auto root   = juce::File::getSpecialLocation( juce::File::tempDirectory ).getChildFile( "kickem_picker" );
             root.deleteRecursively();
@@ -1078,7 +1078,7 @@ namespace sim
 
         wait( 4 );
         s.push_back( [log] {
-            auto exeDir = juce::File::getSpecialLocation( juce::File::currentExecutableFile ).getParentDirectory();
+            auto exeDir = juce::File::getSpecialLocation( juce::File::currentApplicationFile ).getParentDirectory();
             auto source = exeDir.getChildFile( "projects/Vintage Soul Kit" );
             auto root   = juce::File::getSpecialLocation( juce::File::tempDirectory ).getChildFile( "kickem_resources" );
             root.deleteRecursively();
@@ -1166,7 +1166,7 @@ namespace sim
 
         wait( 4 );
         s.push_back( [log] {
-            auto exeDir = juce::File::getSpecialLocation( juce::File::currentExecutableFile ).getParentDirectory();
+            auto exeDir = juce::File::getSpecialLocation( juce::File::currentApplicationFile ).getParentDirectory();
             auto source = exeDir.getChildFile( "projects/Trap Kit" );
             auto root   = juce::File::getSpecialLocation( juce::File::tempDirectory ).getChildFile( "kickem_record" );
             root.deleteRecursively();
