@@ -13,6 +13,14 @@
 
 #include "ComConfig.hpp"
 
+// Serial link to the panel MCU. Also enabled on macOS so a desktop build can talk to a virtual
+// panel over a pseudo-terminal; set KICK_PANEL_DEVICE to its path.
+#if( JUCE_LINUX || __linux__ || JUCE_MAC )
+    #define KICK_PANEL_SERIAL 1
+#else
+    #define KICK_PANEL_SERIAL 0
+#endif
+
 namespace Controls
 {
     std::atomic<bool> halfLevelState{ false };
@@ -45,17 +53,18 @@ namespace Controls
 
         void connect()
         {
-#if( JUCE_LINUX || __linux__ )
-            if( juce::File( "/dev/ttymxc0" ).exists() )
+#if KICK_PANEL_SERIAL
+            const auto   panelDeviceOverride = juce::SystemStats::getEnvironmentVariable( "KICK_PANEL_DEVICE", {} );
+            juce::String serialDev           = panelDeviceOverride.isNotEmpty() ? panelDeviceOverride : juce::String( "/dev/ttymxc0" );
+            if( juce::File( serialDev ).exists() )
             {
                 juce::StringPairArray portlist = SerialPort::getSerialPortPaths();
 
-                if( !portlist.size() )
+                // A virtual panel's pseudo-terminal is not in the serial port list.
+                if( !portlist.size() && panelDeviceOverride.isEmpty() )
                     return;
 
-                bool         hasSerialPort = false;
-                juce::String serialDev     = "/dev/ttymxc0";
-                serialDev                  = "/dev/ttymxc0";
+                bool hasSerialPort = false;
 
                 auto serialDebug = []( juce::String str1, juce::String str2 ) {
                     DBG( str1 );
@@ -63,9 +72,7 @@ namespace Controls
                 };
                 SerialPortConfig config( 230400, 8, SerialPortConfig::SERIALPORT_PARITY_NONE, SerialPortConfig::STOPBITS_1, SerialPortConfig::FLOWCONTROL_NONE );
 
-    #if( JUCE_LINUX || __linux__ )
                 juce::String devPath = serialDev;
-    #endif
                 if( sPort )
                 {
                     input.reset( nullptr );
@@ -73,7 +80,6 @@ namespace Controls
                     sPort.reset( nullptr );
                 }
                 {
-    #if( JUCE_LINUX || __linux__ )
                     CPktMgr::HWMsg_t hwMsg;
                     hwMsg.pktType = CPktMgr::EN_PKT_TYPE_SYSTEM;
                     hwMsg.pktCmd  = contracts::DeviceControlContracts::SysCmd::EN_SYS_COMM_INIT;
@@ -87,7 +93,6 @@ namespace Controls
                     hwMsg.data.push_back( (int)contracts::DeviceControlContracts::SysCommCmd::EN_SYS_COMM_CONNECTED );
                     output.reset( new SerialPortOutputStream( sPort.get() ) );
                     Controls::InputEvents::sendMessageToHardware( hwMsg );
-    #endif
                 }
             }
             else
@@ -132,7 +137,7 @@ namespace Controls
         void handleAsyncUpdate() override { txEvent.signal(); }
         void sendSerialOutData( const std::vector<char>& data )
         {
-#if( JUCE_LINUX || __linux__ )
+#if KICK_PANEL_SERIAL
             if( !output )
                 return;
 
@@ -278,7 +283,7 @@ namespace Controls
 
                 while( txQueue.try_dequeue( item ) && !threadShouldExit() )
                 {
-#if( JUCE_LINUX || __linux__ )
+#if KICK_PANEL_SERIAL
                     txData.clear();
                     ms_objPktMgrUsb.BuildAndTransmitPacket( item, txData );
                     sendSerialOutData( txData );
