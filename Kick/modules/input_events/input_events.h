@@ -51,6 +51,8 @@
     #include <PktMgr/PktMgr.hpp>
     #include <juce_serialport/juce_serialport.h>
 
+class SimulatorInterface;
+
 namespace Controls
 {
     struct InputEvents
@@ -61,6 +63,9 @@ namespace Controls
 
         static void sendMessageToHardware( CPktMgr::HWMsg_t& f_HwMsg );
         static void messageReceived( CPktMgr::HWMsg_t& f_HwMsg );
+
+        // Desktop simulator only: route panel traffic through a simulated panel instead of the MCU.
+        static void attachSimulator( SimulatorInterface* simulator );
 
         static sigslot::signal<CPktMgr::HWMsg_t&> dispatchHardwareEvent;
     };

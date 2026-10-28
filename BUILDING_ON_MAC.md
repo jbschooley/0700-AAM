@@ -54,12 +54,33 @@ screen. Two things to know there:
 - The `KICK_SNAPSHOT` hook below is compiled out on Linux; Xvfb and ImageMagick's `import`
   take a headless screenshot instead.
 
+## Simulator (`KT_KickEM`)
+
+On the `simulator` branch of [jbschooley/0700-AAM](https://github.com/jbschooley/0700-AAM),
+the simulator runs the Kick app itself (same engine, device adapter and UI as `apps/kick`)
+with an on-screen front panel in the same window: 16 pads (velocity follows where you
+press), the centre knob and knobs 1–4, the touch slider, banks, transport and the mode
+buttons. The panel sends the same `HWMsg_t` messages the panel MCU sends and shows the LED
+and pad-colour messages the app sends back.
+
+```bash
+cmake -S Kick -B Kick/build-sim -DKICK_SIMULATOR=ON   # after Kick/build-mac.sh has configured once
+ninja -C Kick/build-sim KT_KickEM
+cd Kick && build-sim/KT_KickEM.app/Contents/MacOS/KT_KickEM
+```
+
+Start it from the `Kick/` folder, like the Kick app, so it finds `./assets`, `./demos` and
+`./templates`. Pad colours are approximations: the real ones are defined in the panel MCU's
+firmware, which is not released.
+
+Setting `KICK_PANEL_DEVICE` to a serial device also opens the serial panel link (on macOS as
+well as Linux), so an external panel, real or virtual, can drive the app or the simulator.
+
 ## Not done yet
 
-- **The simulator (`KT_KickEM`)** still fails: its panel code predates the current packet
-  protocol (it uses `sig::Signal`, `mt::Kick::HwControlCommands` and button helpers that
-  no longer exist). The `Kick` app does not need it.
-- **Quitting** ends in an abort (exit 134) after the window closes.
+- **Quitting** ends in an abort (exit 134) after the window closes. The simulator ends in a
+  segfault (exit 139) instead: `kick_ui::KickHome` is a function-local static, so it is
+  destroyed during process exit, after JUCE has shut down.
 - Audio, recording and the drum filter compile and are wired in, but have not been listened to.
 - Nothing has been built for the device itself (aarch64 Buildroot).
 

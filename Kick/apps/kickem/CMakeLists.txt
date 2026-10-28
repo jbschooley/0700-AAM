@@ -17,43 +17,47 @@ juce_add_gui_app(${TargetName}
         COMPANY_NAME ${TargetCompany}
 )
 
-juce_generate_juce_header(${TargetName})
-set_target_properties(${TargetName} PROPERTIES 
-        CXX_STANDARD                    17 
+set_target_properties(${TargetName} PROPERTIES
+        CXX_STANDARD                    17
         VS_DEBUGGER_WORKING_DIRECTORY   "${CMAKE_CURRENT_SOURCE_DIR}"
 )
+if(MSVC OR APPLE)
+    # Same output location as the Kick app.
+    set_target_properties(${TargetName} PROPERTIES
+                        RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR}/$<0:>
+                        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<0:>
+                        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<0:>
+    )
+endif()
 
 target_include_directories(${TargetName}
     PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-target_sources(${TargetName} 
+target_sources(${TargetName}
     PRIVATE
-        simulator/kick_SimulatorInterfaceImpl.h
-        simulator/kick_SimulatorControls.h
-        simulator/kick_Simulator.h
-        simulator/kick_SimulatorMainControl.h
-        simulator/kick_Simulator.cpp
-        simulator/kick_SimulatorMainControl.cpp
-        simulator/kick_SimulatorControls.cpp
         Main.cpp
-        simulator/kick_SimulatorInterfaceImpl.cpp)
+        simulator/kick_SimulatorPanel.h
+        simulator/kick_SimulatorPanel.cpp)
 
-target_compile_definitions(${TargetName} 
+# The simulator runs the Kick app itself, so it uses the Kick app's settings plus SIM_BUILD.
+target_compile_definitions(${TargetName}
     PRIVATE
         SIM_BUILD=1
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
         JUCE_APPLICATION_NAME_STRING="$<TARGET_PROPERTY:${TargetName},JUCE_PROJECT_NAME>"
         JUCE_APPLICATION_VERSION_STRING="$<TARGET_PROPERTY:${TargetName},JUCE_VERSION>"
+        JUCE_ALSA=1
+        JUCE_JACK=1
 
         JUCER_ENABLE_GPL_MODE=0
         JUCE_DISPLAY_SPLASH_SCREEN=0
         JUCE_REPORT_APP_USAGE=0
         JUCE_DISPLAY_SPLASH_SCREEN=0
 
-        JUCE_MODAL_LOOPS_PERMITTED=1
+        JUCE_MODAL_LOOPS_PERMITTED=0
         JUCE_STRICT_REFCOUNTEDPOINTER=1
 
         JUCE_ASIO=0
@@ -80,12 +84,15 @@ target_link_libraries(${TargetName}
         juce::juce_recommended_warning_flags
 
     PRIVATE
+        audio_engine
         kick_ui
         program_edit_ui
         juce::juce_gui_extra
         juce::juce_audio_devices
         juce::juce_audio_processors
         juce::juce_audio_utils
+        contracts
+        ipc
 )
 
 option( USE_ASAN_KICK "enable address sanitizer" OFF )
